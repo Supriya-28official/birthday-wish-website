@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ event }} Surprise ✨</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div id="confetti"></div>
+
+<section class="hero" id="hero">
+  <div class="gift" id="gift">🎁</div>
+  <p class="small">A SPECIAL SURPRISE FOR</p>
+  <h1>{{ name }}</h1>
+  <button onclick="openSurprise()">Open Your Surprise 💝</button>
+</section>
+
+<section class="content hidden" id="content">
+  <div class="badge">✨ {{ event }} ✨</div>
+  <h2>Happy {{ event }}, <span>{{ name }}</span>! 🎉</h2>
+  <p class="message">{{ message }}</p>
+
+  <div class="cake">🎂</div>
+
+  <section class="card">
+    <h3>📸 Our Moments</h3>
+    <p>{{ moments }}</p>
+    <div class="gallery">
+      {% if photos %}
+        {% for photo in photos %}
+          <img src="{{ photo }}" alt="Memory">
+        {% endfor %}
+      {% else %}
+        <div class="photo-placeholder">📷<span>Photo 1</span></div>
+        <div class="photo-placeholder">💖<span>Photo 2</span></div>
+        <div class="photo-placeholder">✨<span>Photo 3</span></div>
+      {% endif %}
+    </div>
+  </section>
+
+  <section class="wish">
+    <h3>💌 A Little Message</h3>
+    <p>{{ message }}</p>
+  </section>
+
+  {% if music %}
+    <audio id="realMusic" src="{{ music }}" loop></audio>
+    <button class="music" onclick="toggleRealMusic()">🎵 Play / Pause Music</button>
+  {% else %}
+    <button class="music" onclick="toggleTune()">🎵 Play / Pause Music</button>
+  {% endif %}
+
+  <p class="footer">Made with 💖 for {{ name }}</p>
+</section>
+
+<section class="customizer">
+  <h2>✨ Create Your Own Surprise</h2>
+  <p>Enter details and upload photos/music to preview a customized website.</p>
+  <form method="POST" enctype="multipart/form-data">
+    <input name="name" placeholder="Person's name" required>
+    <select name="event">
+      <option>Birthday</option>
+      <option>Anniversary</option>
+      <option>Congratulations</option>
+      <option>Special Day</option>
+    </select>
+    <textarea name="message" placeholder="Personal message" rows="4"></textarea>
+    <textarea name="moments" placeholder="Moments / memories text" rows="3"></textarea>
+    <label>📸 Upload multiple photos</label>
+    <input type="file" name="photos" accept="image/*" multiple>
+    <label>🎵 Upload your own music (optional)</label>
+    <input type="file" name="music" accept="audio/*">
+    <button type="submit">✨ Generate My Website</button>
+  </form>
+</section>
+
+<script>
+function openSurprise(){
+  document.getElementById("gift").classList.add("bounce");
+  setTimeout(()=>{
+    document.getElementById("hero").style.display="none";
+    document.getElementById("content").classList.remove("hidden");
+    launchConfetti();
+  },700);
+}
+function launchConfetti(){
+  const box=document.getElementById("confetti");
+  for(let i=0;i<100;i++){
+    const x=document.createElement("span");
+    x.className="confetti";
+    x.style.left=Math.random()*100+"vw";
+    x.style.animationDelay=Math.random()*1.2+"s";
+    box.appendChild(x);
+    setTimeout(()=>x.remove(),3500);
+  }
+}
+function toggleRealMusic(){
+  const a=document.getElementById("realMusic");
+  if(a.paused) a.play(); else a.pause();
+}
+let ctx, tuneTimer, playing=false;
+function toggleTune(){
+  if(playing){clearInterval(tuneTimer);playing=false;return;}
+  ctx=ctx||new(window.AudioContext||window.webkitAudioContext)();
+  playing=true;
+  const notes=[523,659,784,659,587,698,880,698]; let i=0;
+  tuneTimer=setInterval(()=>{
+    const o=ctx.createOscillator(),g=ctx.createGain();
+    o.frequency.value=notes[i++%notes.length]; o.type="sine";
+    g.gain.setValueAtTime(.0001,ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(.05,ctx.currentTime+.02);
+    g.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+.28);
+    o.connect(g).connect(ctx.destination);o.start();o.stop(ctx.currentTime+.3);
+  },330);
+}
+</script>
+</body>
+</html>
